@@ -21,46 +21,10 @@ class _AddressLookupPageState extends State<AddressLookupPage> {
     ui.platformViewRegistry.registerViewFactory(
       'royal-mail-widget',
       (int viewId) {
-        final container = html.DivElement();
-        container.style.width = '100%';
-        container.style.height = '400px';
+        final container = html.DivElement()
+          ..style.width = '100%'
+          ..style.height = '400px';
 
-        // Add Royal Mail CSS
-        final styleElement = html.StyleElement();
-        styleElement.text = '''
-          .address-lookup {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
-          }
-          .address-lookup label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-          }
-          .address-lookup input {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-          }
-          .address-lookup select {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-          }
-        ''';
-        html.document.head!.children.add(styleElement);
-        
-        // Add Royal Mail script
-        final script = html.ScriptElement()
-          ..src = 'https://ws.addressnow.co.uk/js/addressnow-2.20.min.js'
-          ..type = 'text/javascript';
-        html.document.head!.children.add(script);
-        
         // Create the address lookup div
         final addressLookupDiv = html.DivElement()
           ..className = 'address-lookup';
@@ -104,40 +68,38 @@ class _AddressLookupPageState extends State<AddressLookupPage> {
         addressLookupDiv.children.addAll([postcodeDiv, addressFieldsDiv]);
         container.children.add(addressLookupDiv);
 
-        // Initialize AddressNow after a short delay to ensure the script is loaded
-        html.window.onLoad.listen((_) {
-          js.context.callMethod('AddressNow', [
-            {
-              'key': 'YOUR-API-KEY-HERE',
-              'bar': js.context['document'].callMethod('getElementById', ['postcode-lookup']),
-              'callback': js.allowInterop((address) {
-                // Update the address fields
-                (html.document.getElementById('address-line1') as html.InputElement)
-                    .value = address['line1'] ?? '';
-                (html.document.getElementById('address-line2') as html.InputElement)
-                    .value = address['line2'] ?? '';
-                (html.document.getElementById('city') as html.InputElement)
-                    .value = address['town'] ?? '';
-                (html.document.getElementById('postcode') as html.InputElement)
-                    .value = address['postcode'] ?? '';
+        // Initialize AddressNow
+        js.context.callMethod('AddressNow', [
+          {
+            'key': 'YOUR-API-KEY-HERE',
+            'bar': postcodeInput,
+            'callback': js.allowInterop((address) {
+              // Update the address fields
+              (html.document.getElementById('address-line1') as html.InputElement)
+                  .value = address['line1'] ?? '';
+              (html.document.getElementById('address-line2') as html.InputElement)
+                  .value = address['line2'] ?? '';
+              (html.document.getElementById('city') as html.InputElement)
+                  .value = address['town'] ?? '';
+              (html.document.getElementById('postcode') as html.InputElement)
+                  .value = address['postcode'] ?? '';
 
-                // Show the address fields
-                html.document.getElementById('address-fields')!.style.display = 'block';
+              // Show the address fields
+              html.document.getElementById('address-fields')!.style.display = 'block';
 
-                // Update Flutter state
-                setState(() {
-                  _isAddressSelected = true;
-                  _selectedAddress = {
-                    'line1': address['line1'] ?? '',
-                    'line2': address['line2'] ?? '',
-                    'city': address['town'] ?? '',
-                    'postcode': address['postcode'] ?? '',
-                  };
-                });
-              }),
-            }
-          ]);
-        });
+              // Update Flutter state
+              setState(() {
+                _isAddressSelected = true;
+                _selectedAddress = {
+                  'line1': address['line1'] ?? '',
+                  'line2': address['line2'] ?? '',
+                  'city': address['town'] ?? '',
+                  'postcode': address['postcode'] ?? '',
+                };
+              });
+            }),
+          }
+        ]);
 
         return container;
       },
