@@ -21,9 +21,9 @@ class _AddressLookupPageState extends State<AddressLookupPage> {
     ui.platformViewRegistry.registerViewFactory(
       'royal-mail-widget',
       (int viewId) {
-        final container = html.DivElement()
-          ..style.width = '100%'
-          ..style.height = '400px';
+        final container = html.DivElement();
+        container.style.width = '100%';
+        container.style.height = '400px';
 
         // Add Royal Mail CSS
         final styleElement = html.StyleElement();
@@ -53,42 +53,56 @@ class _AddressLookupPageState extends State<AddressLookupPage> {
             border-radius: 4px;
           }
         ''';
-        html.document.head?.appendChild(styleElement);
+        html.document.head!.children.add(styleElement);
         
         // Add Royal Mail script
         final script = html.ScriptElement()
           ..src = 'https://ws.addressnow.co.uk/js/addressnow-2.20.min.js'
           ..type = 'text/javascript';
-        html.document.head?.appendChild(script);
+        html.document.head!.children.add(script);
         
-        // Create the HTML structure
-        container.innerHTML = '''
-          <div class="address-lookup">
-            <div>
-              <label for="postcode-lookup">Enter Postcode:</label>
-              <input 
-                type="text" 
-                id="postcode-lookup" 
-                placeholder="Enter postcode"
-                class="addressnow"
-                style="width: 100%;"
-              />
-            </div>
-            <div id="address-fields" style="display: none;">
-              <label for="address-line1">Address Line 1:</label>
-              <input type="text" id="address-line1" readonly />
-              
-              <label for="address-line2">Address Line 2:</label>
-              <input type="text" id="address-line2" readonly />
-              
-              <label for="city">City:</label>
-              <input type="text" id="city" readonly />
-              
-              <label for="postcode">Postcode:</label>
-              <input type="text" id="postcode" readonly />
-            </div>
-          </div>
-        ''';
+        // Create the address lookup div
+        final addressLookupDiv = html.DivElement()
+          ..className = 'address-lookup';
+
+        // Create postcode input section
+        final postcodeDiv = html.DivElement();
+        final postcodeLabel = html.LabelElement()
+          ..htmlFor = 'postcode-lookup'
+          ..text = 'Enter Postcode:';
+        final postcodeInput = html.InputElement()
+          ..id = 'postcode-lookup'
+          ..placeholder = 'Enter postcode'
+          ..className = 'addressnow'
+          ..style.width = '100%';
+        postcodeDiv.children.addAll([postcodeLabel, postcodeInput]);
+
+        // Create address fields section
+        final addressFieldsDiv = html.DivElement()
+          ..id = 'address-fields'
+          ..style.display = 'none';
+
+        // Create address input fields
+        final fields = [
+          {'id': 'address-line1', 'label': 'Address Line 1:'},
+          {'id': 'address-line2', 'label': 'Address Line 2:'},
+          {'id': 'city', 'label': 'City:'},
+          {'id': 'postcode', 'label': 'Postcode:'},
+        ];
+
+        for (var field in fields) {
+          final label = html.LabelElement()
+            ..htmlFor = field['id']!
+            ..text = field['label']!;
+          final input = html.InputElement()
+            ..id = field['id']!
+            ..readOnly = true;
+          addressFieldsDiv.children.addAll([label, input]);
+        }
+
+        // Add all elements to the container
+        addressLookupDiv.children.addAll([postcodeDiv, addressFieldsDiv]);
+        container.children.add(addressLookupDiv);
 
         // Initialize AddressNow after a short delay to ensure the script is loaded
         html.window.onLoad.listen((_) {
@@ -98,24 +112,17 @@ class _AddressLookupPageState extends State<AddressLookupPage> {
               'bar': js.context['document'].callMethod('getElementById', ['postcode-lookup']),
               'callback': js.allowInterop((address) {
                 // Update the address fields
-                js.context['document']
-                    .callMethod('getElementById', ['address-line1'])
-                    .setAttribute('value', address['line1'] ?? '');
-                js.context['document']
-                    .callMethod('getElementById', ['address-line2'])
-                    .setAttribute('value', address['line2'] ?? '');
-                js.context['document']
-                    .callMethod('getElementById', ['city'])
-                    .setAttribute('value', address['town'] ?? '');
-                js.context['document']
-                    .callMethod('getElementById', ['postcode'])
-                    .setAttribute('value', address['postcode'] ?? '');
+                (html.document.getElementById('address-line1') as html.InputElement)
+                    .value = address['line1'] ?? '';
+                (html.document.getElementById('address-line2') as html.InputElement)
+                    .value = address['line2'] ?? '';
+                (html.document.getElementById('city') as html.InputElement)
+                    .value = address['town'] ?? '';
+                (html.document.getElementById('postcode') as html.InputElement)
+                    .value = address['postcode'] ?? '';
 
                 // Show the address fields
-                js.context['document']
-                    .callMethod('getElementById', ['address-fields'])
-                    .style
-                    .display = 'block';
+                html.document.getElementById('address-fields')!.style.display = 'block';
 
                 // Update Flutter state
                 setState(() {
