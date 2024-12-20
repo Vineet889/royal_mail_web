@@ -36,24 +36,6 @@ class _AddressLookupPageState extends State<AddressLookupPage> {
                   placeholder="Enter postcode"
                 />
               </div>
-              <div id="selected-address" style="display: none;">
-                <div style="margin-bottom: 15px;">
-                  <label style="display: block; margin-bottom: 5px;">Address Line 1:</label>
-                  <input type="text" id="address-line1" readonly style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"/>
-                </div>
-                <div style="margin-bottom: 15px;">
-                  <label style="display: block; margin-bottom: 5px;">Address Line 2:</label>
-                  <input type="text" id="address-line2" readonly style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"/>
-                </div>
-                <div style="margin-bottom: 15px;">
-                  <label style="display: block; margin-bottom: 5px;">City:</label>
-                  <input type="text" id="city" readonly style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"/>
-                </div>
-                <div style="margin-bottom: 15px;">
-                  <label style="display: block; margin-bottom: 5px;">Postcode:</label>
-                  <input type="text" id="postcode" readonly style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"/>
-                </div>
-              </div>
             </form>
           </div>
         ''';
@@ -65,19 +47,6 @@ class _AddressLookupPageState extends State<AddressLookupPage> {
               'key': 'YOUR-API-KEY-HERE',
               'bar': html.document.getElementById('postcode-lookup'),
               'callback': js.allowInterop((address) {
-                // Show the address fields container
-                html.document.getElementById('selected-address')?.style.display = 'block';
-                
-                // Update the address fields
-                (html.document.getElementById('address-line1') as html.InputElement?)
-                    ?.value = address['line1'] ?? '';
-                (html.document.getElementById('address-line2') as html.InputElement?)
-                    ?.value = address['line2'] ?? '';
-                (html.document.getElementById('city') as html.InputElement?)
-                    ?.value = address['town'] ?? '';
-                (html.document.getElementById('postcode') as html.InputElement?)
-                    ?.value = address['postcode'] ?? '';
-
                 // Update Flutter state
                 setState(() {
                   _isAddressSelected = true;
@@ -104,7 +73,8 @@ class _AddressLookupPageState extends State<AddressLookupPage> {
       appBar: AppBar(title: const Text('Address Lookup')),
       body: Column(
         children: [
-          Expanded(
+          Container(
+            height: 120, // Fixed height for the postcode lookup
             child: const HtmlElementView(viewType: 'royal-mail-widget'),
           ),
           Padding(
