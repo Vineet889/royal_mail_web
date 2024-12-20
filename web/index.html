@@ -31,37 +31,19 @@
 
   <!-- Royal Mail AddressNow Integration -->
   <script type="text/javascript" src="https://ws.addressnow.co.uk/js/addressnow-2.20.min.js"></script>
-  <style>
-    .address-lookup {
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    .address-lookup label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    .address-lookup input {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .address-lookup select {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-  </style>
 
   <title>royal_mail_web</title>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // Ensure AddressNow is loaded before Flutter
+    window.addEventListener('load', function() {
+      var scriptTag = document.createElement('script');
+      scriptTag.src = 'flutter_bootstrap.js';
+      scriptTag.type = 'application/javascript';
+      document.body.appendChild(scriptTag);
+    });
+  </script>
 </body>
 </html>
