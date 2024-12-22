@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:html' as html;
-import 'dart:ui_web' as ui;
 import 'dart:js' as js;
 
 class AddressLookupPage extends StatefulWidget {
@@ -11,56 +9,25 @@ class AddressLookupPage extends StatefulWidget {
 }
 
 class _AddressLookupPageState extends State<AddressLookupPage> {
+  final TextEditingController _controller = TextEditingController();
   bool _isAddressSelected = false;
   Map<String, dynamic>? _selectedAddress;
-  final String viewType = 'royal-mail-widget';
 
   @override
   void initState() {
     super.initState();
-    // Register the HTML view
-    ui.platformViewRegistry.registerViewFactory(
-      viewType,
-      (int viewId) {
-        final container = html.DivElement()
-          ..style.width = '100%'
-          ..style.height = '100px';
-
-        // Create the input element
-        final input = html.InputElement()
-          ..id = 'postcode-lookup'
-          ..className = 'addressnow'
-          ..style.width = '100%'
-          ..style.padding = '8px'
-          ..style.border = '1px solid #ccc'
-          ..style.borderRadius = '4px'
-          ..placeholder = 'Enter your postcode';
-
-        container.children.add(input);
-
-        // Initialize AddressNow
-        js.context.callMethod('AddressNow', [
-          {
-            'key': 'GG36-BF96-ZJ53-EW94',  // Replace with your API key
-            'bar': input,
-            'onSelect': js.allowInterop((address) {
-              print('Address selected: $address'); // Debug print
-              setState(() {
-                _isAddressSelected = true;
-                _selectedAddress = {
-                  'line1': address['line1'] ?? '',
-                  'line2': address['line2'] ?? '',
-                  'city': address['town'] ?? '',
-                  'postcode': address['postcode'] ?? '',
-                };
-              });
-            }),
-          }
-        ]);
-
-        return container;
-      },
-    );
+    // Set up the callback for address selection
+    js.context['addressSelectedCallback'] = (address) {
+      setState(() {
+        _isAddressSelected = true;
+        _selectedAddress = {
+          'line1': address['line1'] ?? '',
+          'line2': address['line2'] ?? '',
+          'city': address['town'] ?? '',
+          'postcode': address['postcode'] ?? '',
+        };
+      });
+    };
   }
 
   @override
@@ -73,13 +40,16 @@ class _AddressLookupPageState extends State<AddressLookupPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Container(
-              height: 100,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(4),
+            TextField(
+              controller: _controller,
+              decoration: const InputDecoration(
+                labelText: 'Enter Postcode',
+                border: OutlineInputBorder(),
               ),
-              child: HtmlElementView(viewType: viewType),
+              onTap: () {
+                // Initialize AddressNow when the TextField is tapped
+                js.context.callMethod('initializeAddressNow', ['flutter-textfield']);
+              },
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -98,5 +68,11 @@ class _AddressLookupPageState extends State<AddressLookupPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 } 

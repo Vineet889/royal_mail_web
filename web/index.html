@@ -19,15 +19,22 @@
 
   <!-- Royal Mail AddressNow Integration -->
   <script type="text/javascript" src="https://ws.addressnow.co.uk/js/addressnow-2.20.min.js"></script>
+  <script type="text/javascript">
+    function initializeAddressNow(inputId) {
+      AddressNow({
+        'key': 'YOUR-API-KEY-HERE',
+        'bar': document.getElementById(inputId),
+        'onSelect': function(address) {
+          // Send the selected address back to Flutter
+          if (window.addressSelectedCallback) {
+            window.addressSelectedCallback(address);
+          }
+        }
+      });
+    }
+  </script>
 </head>
 <body>
-  <script>
-    window.addEventListener('load', function() {
-      var scriptTag = document.createElement('script');
-      scriptTag.src = 'main.dart.js';
-      scriptTag.type = 'application/javascript';
-      document.body.appendChild(scriptTag);
-    });
-  </script>
+  <script src="main.dart.js" defer></script>
 </body>
 </html>
