@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:html' as html;
-// import 'dart:ui' as ui;
 import 'dart:ui_web' as ui;
 import 'dart:js' as js;
 
@@ -14,54 +13,50 @@ class AddressLookupPage extends StatefulWidget {
 class _AddressLookupPageState extends State<AddressLookupPage> {
   bool _isAddressSelected = false;
   Map<String, dynamic>? _selectedAddress;
+  final String viewType = 'royal-mail-widget';
 
   @override
   void initState() {
     super.initState();
     // Register the HTML view
     ui.platformViewRegistry.registerViewFactory(
-      'royal-mail-widget',
+      viewType,
       (int viewId) {
-        final container = html.DivElement();
-        
-        container.innerHtml = '''
-          <div style="padding: 20px;">
-            <form>
-              <div style="margin-bottom: 15px;">
-                <label for="postcode-lookup" style="display: block; margin-bottom: 5px;">Enter Postcode:</label>
-                <input 
-                  type="text" 
-                  id="postcode-lookup" 
-                  class="addressnow" 
-                  style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
-                  placeholder="Enter postcode"
-                />
-              </div>
-            </form>
-          </div>
-        ''';
+        final container = html.DivElement()
+          ..style.width = '100%'
+          ..style.height = '100px';
+
+        // Create the input element
+        final input = html.InputElement()
+          ..id = 'postcode-lookup'
+          ..className = 'addressnow'
+          ..style.width = '100%'
+          ..style.padding = '8px'
+          ..style.border = '1px solid #ccc'
+          ..style.borderRadius = '4px'
+          ..placeholder = 'Enter your postcode';
+
+        container.children.add(input);
 
         // Initialize AddressNow
-        html.window.onLoad.listen((_) {
-          js.context.callMethod('AddressNow', [
-            {
-              'key': 'YOUR-API-KEY-HERE',
-              'bar': html.document.getElementById('postcode-lookup'),
-              'callback': js.allowInterop((address) {
-                // Update Flutter state
-                setState(() {
-                  _isAddressSelected = true;
-                  _selectedAddress = {
-                    'line1': address['line1'] ?? '',
-                    'line2': address['line2'] ?? '',
-                    'city': address['town'] ?? '',
-                    'postcode': address['postcode'] ?? '',
-                  };
-                });
-              }),
-            }
-          ]);
-        });
+        js.context.callMethod('AddressNow', [
+          {
+            'key': 'GG36-BF96-ZJ53-EW94',  // Replace with your API key
+            'bar': input,
+            'onSelect': js.allowInterop((address) {
+              print('Address selected: $address'); // Debug print
+              setState(() {
+                _isAddressSelected = true;
+                _selectedAddress = {
+                  'line1': address['line1'] ?? '',
+                  'line2': address['line2'] ?? '',
+                  'city': address['town'] ?? '',
+                  'postcode': address['postcode'] ?? '',
+                };
+              });
+            }),
+          }
+        ]);
 
         return container;
       },
@@ -71,16 +66,23 @@ class _AddressLookupPageState extends State<AddressLookupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Address Lookup')),
-      body: Column(
-        children: [
-          Container(
-            height: 120, // Fixed height for the postcode lookup
-            child: const HtmlElementView(viewType: 'royal-mail-widget'),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
+      appBar: AppBar(
+        title: const Text('Address Lookup'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Container(
+              height: 100,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: HtmlElementView(viewType: viewType),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
               onPressed: _isAddressSelected
                   ? () {
                       Navigator.pushNamed(
@@ -92,8 +94,8 @@ class _AddressLookupPageState extends State<AddressLookupPage> {
                   : null,
               child: const Text('Continue'),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
