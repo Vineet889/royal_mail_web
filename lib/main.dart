@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:html' as html;
-import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart';
+import 'package:royal_mail_web/pages/address_lookup_page.dart';
+import 'package:royal_mail_web/pages/address_details_page.dart';
 
 void main() {
   runApp(const MyApp());
