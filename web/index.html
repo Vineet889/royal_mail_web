@@ -14,22 +14,38 @@
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
-  <title>Royal Mail Address Lookup</title>
+  <title>Jumio</title>
   <link rel="manifest" href="manifest.json">
 
   <!-- Royal Mail AddressNow Integration -->
   <script type="text/javascript" src="https://ws.addressnow.co.uk/js/addressnow-2.20.min.js"></script>
-  <script type="text/javascript">
-    function initializeAddressNow(inputId) {
-      AddressNow({
-        'key': 'YOUR-API-KEY-HERE',
-        'bar': document.getElementById(inputId),
-        'onSelect': function(address) {
-          // Send the selected address back to Flutter
-          if (window.addressSelectedCallback) {
-            window.addressSelectedCallback(address);
-          }
+  
+  <!-- Jumio SDK -->
+  <script src="https://cdn.jumio.com/websdk/v1.0.0/jumio.js"></script>
+  <script>
+    function startJumioVerification() {
+      const jumioConfig = {
+        // Replace with your Jumio API credentials
+        apiToken: 'YOUR_API_TOKEN',
+        apiSecret: 'YOUR_API_SECRET',
+        dataCenter: 'EU', // e.g., 'US', 'EU'
+        // Additional configuration options
+      };
+
+      Jumio.init(jumioConfig, function (error, instance) {
+        if (error) {
+          console.error('Jumio initialization error:', error);
+          return;
         }
+
+        instance.startVerification(function (verificationError, result) {
+          if (verificationError) {
+            console.error('Verification error:', verificationError);
+            return;
+          }
+          console.log('Verification result:', result);
+          // Handle the result (e.g., send it to your server)
+        });
       });
     }
   </script>
